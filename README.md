@@ -19,10 +19,8 @@ The page lives in `src/pages/index.astro`. It opens on a black, glowing "tech" h
 | Section | Anchor | What it does |
 |---|---|---|
 | Navbar | — | Dark bar (`src/components/Header.astro`): logo, glass pill of links with the current one lit, Call and Book now buttons; dropdown menu on mobile |
-| Hero | `#top` | Black, with two glowing curved light sweeps that draw in; a glass emblem of the petal mark with circuit traces and travelling light; "Heal Gently, Live Fully"; four theme tiles |
+| Hero | `#top` | Black, with two glowing curved light sweeps that draw in; a glass emblem of the petal mark with circuit traces and travelling light; "Heal Gently, Live Fully"; four theme tiles that open WhatsApp about that theme |
 | Steps | — | "Every Journey Begins Gently": three glowing step boxes joined by lines with a moving light |
-| What we help with | `#approach` | Dark lens graphic with floating orbs beside a pale panel of topics the programs explore |
-| Programs | `#programs` | Dots that spread out as you scroll, then a navy band: pick a theme on the right to see its name and program links on the left (auto-advances until you choose) |
 | About | `#about` | Dr. Deepa's portrait (the only photo of her) beside her story, qualifications and the team avatars |
 | Footer | `#contact` | Unchanged |
 

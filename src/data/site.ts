@@ -68,8 +68,6 @@ export const site = {
 export const nav = [
   { label: 'Home', href: '#top' },
   { label: 'About', href: '#about' },
-  { label: 'Approach', href: '#approach' },
-  { label: 'Programs', href: '#programs' },
   { label: 'Contact', href: '#contact' },
 ];
 

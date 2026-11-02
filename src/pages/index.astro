@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import { site, waLink } from '../data/site';
-import { categories, programs, programsIn, type CategoryId } from '../data/programs';
+import { categories, programs, type CategoryId } from '../data/programs';
 import { founder, team } from '../data/people';
 import { img } from '../lib/images';
 
@@ -24,15 +24,6 @@ const steps = [
   { icon: 'check', text: 'Practices you take home' },
 ] as const;
 
-// Topics the programs explore, taken from the program pages.
-const topics = ['Emotional release', 'Balance & alignment', 'Energy & vitality', 'Releasing tension', 'Mind–body connection', 'Mirror work', 'A happy relationship with money', 'Colour therapy', 'Acupressure', 'Personal crystal sessions'];
-
-// Dot field: rings of dots that spread outward as the section scrolls in.
-const dots = Array.from({ length: 28 }, (_, i) => {
-  const ring = i % 2 === 0 ? 1 : 0.62;
-  const a = (i / 28) * Math.PI * 2;
-  return { x: (Math.cos(a) * 46 * ring).toFixed(1), y: (Math.sin(a) * 40 * ring).toFixed(1), s: [4, 7, 10][i % 3], big: i % 5 === 0 };
-});
 ---
 
 <Base title={site.name}>
@@ -104,7 +95,7 @@ const dots = Array.from({ length: 28 }, (_, i) => {
         {
           catIds.map((id, i) => (
             <li style={`--ti:${i}`}>
-              <a href={`#programs`} data-theme-jump={i}>
+              <a href={ask(categories[id].name)} target="_blank" rel="noopener">
                 <Icon name={themeIcons[id]} size={14} />
                 <span>{categories[id].name}</span>
               </a>
@@ -129,86 +120,6 @@ const dots = Array.from({ length: 28 }, (_, i) => {
         ))
       }
     </ol>
-  </section>
-
-  <!-- ============ WHAT WE HELP WITH (white) ============ -->
-  <section class="help" id="approach">
-    <div class="wrap center-head">
-      <span class="tag" data-animate>What we help with</span>
-      <h2 class="title" data-split>Everyday Life Carries <em>Hidden Weight</em></h2>
-      <p class="lede" data-animate>Stress, old patterns and questions without answers build up quietly. Our programs give you gentle, practical ways to set them down.</p>
-    </div>
-    <div class="wrap split-card" data-animate="scale">
-      <div class="lens">
-        <span class="lens-l"></span>
-        <span class="lens-r"></span>
-        <span class="orb o1"><Icon name="sparkle" size={14} /></span>
-        <span class="orb o2"></span>
-        <span class="orb o3"><Icon name="layers" size={13} /></span>
-        <span class="orb o4"></span>
-        <p class="lens-text">Gentle <span>Release</span></p>
-      </div>
-      <div class="panel">
-        <h3>What our programs explore</h3>
-        <ul role="list" class="topic-list">
-          {topics.map((t) => <li><Icon name="chevron" size={12} class="chev" /> {t}</li>)}
-        </ul>
-        <a href="#programs" class="dark-pill">View programs <Icon name="arrow-down" size={12} /></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PROGRAMS (dot field, then a dark band) ============ -->
-  <section class="programs" id="programs" data-progress>
-    <div class="dot-field" aria-hidden="true">
-      {dots.map((d) => <i class:list={{ big: d.big }} style={`--x:${d.x}vw;--y:${d.y}vh;--s:${d.s}px`}></i>)}
-    </div>
-    <div class="wrap center-head prog-head">
-      <span class="tag" data-animate>Programs</span>
-      <h2 class="title" data-split>Four Themes for <em>Every Stage</em></h2>
-    </div>
-
-    <div class="band" data-themes>
-      <div class="band-inner">
-        <div class="band-left">
-          {
-            catIds.map((id, i) => (
-              <div class:list={['band-word', { show: i === 0 }]} data-theme-word={i}>
-                <p class="bw-title">
-                  {categories[id].name}
-                  <span class="bw-dot" aria-hidden="true"></span>
-                </p>
-                <ul role="list" class="bw-progs">
-                  {programsIn(id).map((p) => (
-                    <li>
-                      <a href={ask(p.name)} target="_blank" rel="noopener">
-                        {p.name} <Icon name="arrow-up-right" size={10} />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          }
-        </div>
-
-        <ul role="list" class="band-list">
-          {
-            catIds.map((id, i) => (
-              <li>
-                <button class:list={['bl-item', { active: i === 0 }]} data-theme-item={i} aria-pressed={i === 0 ? 'true' : 'false'}>
-                  <span class="bl-dot" aria-hidden="true"></span>
-                  <span class="bl-text">
-                    <strong>{categories[id].name}</strong>
-                    <small>{programsIn(id).length} programs · {categories[id].blurb}</small>
-                  </span>
-                </button>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-    </div>
   </section>
 
   <!-- ============ ABOUT (white) ============ -->
@@ -239,48 +150,6 @@ const dots = Array.from({ length: 28 }, (_, i) => {
     </div>
   </section>
 </Base>
-
-<script>
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // Program band: pick a theme from the list; it also advances on its own
-  // every few seconds until someone chooses.
-  const band = document.querySelector<HTMLElement>('[data-themes]');
-  if (band) {
-    const items = Array.from(band.querySelectorAll<HTMLButtonElement>('[data-theme-item]'));
-    const words = Array.from(band.querySelectorAll<HTMLElement>('[data-theme-word]'));
-    let at = 0;
-    let timer = 0;
-    const show = (i: number) => {
-      at = i;
-      items.forEach((b, j) => {
-        b.classList.toggle('active', j === i);
-        b.setAttribute('aria-pressed', String(j === i));
-      });
-      words.forEach((w, j) => w.classList.toggle('show', j === i));
-    };
-    const stop = () => window.clearInterval(timer);
-    items.forEach((b, i) =>
-      b.addEventListener('click', () => {
-        stop();
-        show(i);
-      }),
-    );
-    document.querySelectorAll<HTMLElement>('[data-theme-jump]').forEach((a) =>
-      a.addEventListener('click', () => {
-        stop();
-        show(Number(a.dataset.themeJump));
-      }),
-    );
-    if (!reduced && 'IntersectionObserver' in window) {
-      new IntersectionObserver(([e]) => {
-        stop();
-        if (e.isIntersecting) timer = window.setInterval(() => show((at + 1) % items.length), 4500);
-      }).observe(band);
-      band.addEventListener('pointerenter', stop);
-    }
-  }
-</script>
 
 <style>
   /* ---------- Shared ---------- */
@@ -800,13 +669,7 @@ const dots = Array.from({ length: 28 }, (_, i) => {
     }
   }
 
-  /* ---------- Help (white) ---------- */
-  .help {
-    position: relative;
-    padding: clamp(5rem, 10vw, 7rem) 0 clamp(3rem, 6vw, 5rem);
-    background: var(--white);
-  }
-
+  /* ---------- Shared split card (About) ---------- */
   .split-card {
     display: grid;
     gap: 10px;
@@ -816,113 +679,6 @@ const dots = Array.from({ length: 28 }, (_, i) => {
   @media (min-width: 860px) {
     .split-card {
       grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    }
-  }
-
-  /* Dark lens graphic: two big glowing circles leaving a narrow waist */
-  .lens {
-    position: relative;
-    min-height: 340px;
-    overflow: hidden;
-    border-radius: 18px;
-    background: #050714;
-  }
-
-  .lens-l,
-  .lens-r {
-    position: absolute;
-    top: 50%;
-    width: 120%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(circle, transparent 54%, rgba(106, 113, 214, 0.2) 62%, rgba(140, 147, 227, 0.75) 69.5%, rgba(5, 7, 20, 0) 71%);
-    translate: 0 -50%;
-  }
-
-  .lens-l {
-    right: 56%;
-  }
-
-  .lens-r {
-    left: 56%;
-  }
-
-  .orb {
-    position: absolute;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    color: #121a3a;
-  }
-
-  .o1 {
-    left: 42%;
-    top: 16%;
-    width: 34px;
-    height: 34px;
-    background: #eef0fb;
-  }
-
-  .o2 {
-    left: 52%;
-    top: 28%;
-    width: 26px;
-    height: 26px;
-    background: var(--periwinkle);
-  }
-
-  .o3 {
-    left: 47%;
-    top: 62%;
-    width: 30px;
-    height: 30px;
-    background: var(--periwinkle-200);
-  }
-
-  .o4 {
-    left: 44%;
-    top: 80%;
-    width: 22px;
-    height: 22px;
-    background: rgba(140, 147, 227, 0.5);
-  }
-
-  .lens-text {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    font-size: 1.1rem;
-    font-weight: 500;
-    white-space: nowrap;
-    color: var(--white);
-    translate: -50% -50%;
-  }
-
-  .lens-text span {
-    color: var(--periwinkle);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .o1 {
-      animation: bob 6s ease-in-out infinite;
-    }
-
-    .o2 {
-      animation: bob 7s ease-in-out -2s infinite;
-    }
-
-    .o3 {
-      animation: bob 5.5s ease-in-out -1s infinite;
-    }
-
-    .o4 {
-      animation: bob 8s ease-in-out -3s infinite;
-    }
-  }
-
-  @keyframes bob {
-    50% {
-      transform: translate(10px, -14px);
     }
   }
 
@@ -972,233 +728,6 @@ const dots = Array.from({ length: 28 }, (_, i) => {
     margin-top: 0.15rem;
     rotate: -90deg;
     color: var(--periwinkle-700);
-  }
-
-  .dark-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    justify-self: start;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.9rem;
-    border-radius: 8px;
-    background: #121a3a;
-    color: var(--white);
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background-color 0.3s;
-  }
-
-  .dark-pill:hover {
-    background: var(--periwinkle-700);
-  }
-
-  /* ---------- Programs ---------- */
-  .programs {
-    position: relative;
-    isolation: isolate;
-    padding-top: clamp(5rem, 10vw, 8rem);
-    overflow: hidden;
-    background: var(--white);
-  }
-
-  /* Dots spread outward from the heading as the section scrolls in */
-  .dot-field {
-    position: absolute;
-    z-index: -1;
-    left: 50%;
-    top: clamp(9rem, 16vw, 12rem);
-    width: 0;
-    height: 0;
-  }
-
-  .dot-field i {
-    position: absolute;
-    width: var(--s);
-    height: var(--s);
-    border-radius: 50%;
-    background: var(--periwinkle);
-    opacity: calc(0.25 + var(--p, 1) * 0.6);
-    transform: translate(-50%, -50%) translate(calc(var(--x) * (0.35 + var(--p, 1) * 0.65)), calc(var(--y) * (0.35 + var(--p, 1) * 0.65)));
-    transition: transform 0.3s linear;
-  }
-
-  .dot-field i.big {
-    background: #7f86b8;
-  }
-
-  .prog-head {
-    position: relative;
-    margin-bottom: clamp(5rem, 12vw, 9rem);
-  }
-
-  /* Dark band with the stepper list */
-  .band {
-    position: relative;
-    background: #121a3a;
-    color: var(--white);
-  }
-
-  .band-inner {
-    display: grid;
-    gap: 2.5rem;
-    width: min(100% - 2 * var(--gutter), 1100px);
-    margin-inline: auto;
-    padding: clamp(3rem, 6vw, 4.5rem) 0;
-  }
-
-  @media (min-width: 860px) {
-    .band-inner {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
-    }
-  }
-
-  .band-left {
-    display: grid;
-  }
-
-  .band-word {
-    grid-area: 1 / 1;
-    display: grid;
-    gap: 1.25rem;
-    align-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(14px);
-    transition: opacity 0.6s, transform 0.6s var(--ease-out), visibility 0.6s;
-  }
-
-  .band-word:global(.show) {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-  }
-
-  .bw-title {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: clamp(1.7rem, 1.2rem + 2vw, 2.6rem);
-    font-weight: 500;
-    letter-spacing: -0.03em;
-    color: var(--periwinkle);
-  }
-
-  .bw-dot {
-    width: 14px;
-    height: 14px;
-    flex: none;
-    border-radius: 50%;
-    background: var(--periwinkle);
-    box-shadow: 0 0 0 6px rgba(180, 186, 234, 0.15), 0 0 20px rgba(180, 186, 234, 0.7);
-  }
-
-  .bw-progs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0;
-    padding: 0;
-  }
-
-  .bw-progs a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.35rem 0.7rem;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    font-size: 0.6875rem;
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    transition: border-color 0.3s, background-color 0.3s;
-  }
-
-  .bw-progs a:hover {
-    border-color: var(--periwinkle);
-    background: rgba(180, 186, 234, 0.1);
-  }
-
-  .band-list {
-    display: grid;
-    gap: 0.25rem;
-    margin: 0;
-    padding: 0;
-  }
-
-  .bl-item {
-    position: relative;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    padding: 0.85rem 0.75rem 0.85rem 1rem;
-    border: 0;
-    border-radius: 10px;
-    background: transparent;
-    font: inherit;
-    text-align: left;
-    color: inherit;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  .bl-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 22%;
-    bottom: 22%;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--periwinkle);
-    transform: scaleY(0);
-    transition: transform 0.4s var(--ease);
-  }
-
-  .bl-item:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .bl-item:global(.active)::before {
-    transform: scaleY(1);
-  }
-
-  .bl-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: rgba(180, 186, 234, 0.35);
-    transition: background-color 0.3s, box-shadow 0.3s;
-  }
-
-  .bl-item:global(.active) .bl-dot {
-    background: var(--periwinkle);
-    box-shadow: 0 0 10px var(--periwinkle);
-  }
-
-  .bl-text {
-    display: grid;
-    gap: 0.15rem;
-  }
-
-  .bl-text strong {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
-    transition: color 0.3s;
-  }
-
-  .bl-item:global(.active) strong {
-    color: var(--periwinkle);
-  }
-
-  .bl-text small {
-    font-size: 0.6875rem;
-    color: rgba(255, 255, 255, 0.5);
   }
 
   /* ---------- About ---------- */

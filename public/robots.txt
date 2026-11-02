@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://transformlifeprograms.com/sitemap-index.xml

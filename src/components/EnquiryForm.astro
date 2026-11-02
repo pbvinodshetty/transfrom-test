@@ -1,0 +1,310 @@
+---
+import Icon from './Icon.astro';
+import { programs } from '../data/programs';
+import { site } from '../data/site';
+
+interface Props {
+  variant?: 'booking' | 'contact';
+  id?: string;
+}
+
+const { variant = 'booking', id = 'enquiry' } = Astro.props;
+const booking = variant === 'booking';
+const today = new Date().toISOString().slice(0, 10);
+const types = [
+  { value: 'consultation', label: 'Personal consultation', note: 'One-to-one with Dr. Deepa' },
+  { value: 'program', label: 'Program or workshop', note: 'Dates, fees & enrolment' },
+  { value: 'crystals', label: 'Crystals', note: 'Choosing or ordering' },
+  { value: 'other', label: 'Something else', note: 'Corporate, media, other' },
+];
+---
+
+<form
+  class:list={['enquiry', variant]}
+  id={id}
+  novalidate
+  data-enquiry-form
+  data-endpoint={site.formEndpoint}
+  data-whatsapp={site.whatsapp.appointments}
+  data-whatsapp-crystals={site.whatsapp.crystals}
+>
+  <div class="form-body">
+    {
+      booking && (
+        <fieldset class="field types">
+          <legend>What would you like to book?</legend>
+          <div class="type-grid">
+            {types.map((t, i) => (
+              <label class="type">
+                <input type="radio" name="type" value={t.value} checked={i === 0} />
+                <span class="type-card">
+                  <strong>{t.label}</strong>
+                  <small>{t.note}</small>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )
+    }
+
+    {
+      booking && (
+        <div class="field" data-show-for="program">
+          <label for={`${id}-program`}>Program</label>
+          <select class="select" id={`${id}-program`} name="program">
+            <option value="">Not sure yet — please advise</option>
+            {programs.map((p) => (
+              <option value={p.slug}>{p.name}</option>
+            ))}
+          </select>
+        </div>
+      )
+    }
+
+    <div class="row">
+      <div class="field">
+        <label for={`${id}-name`}>Full name</label>
+        <input class="input" id={`${id}-name`} name="name" autocomplete="name" required maxlength="80" />
+        <p class="field-error" data-error-for="name"></p>
+      </div>
+      <div class="field">
+        <label for={`${id}-phone`}>Phone / WhatsApp</label>
+        <input class="input" id={`${id}-phone`} name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+91" maxlength="20" />
+        <p class="field-error" data-error-for="phone"></p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for={`${id}-email`}>Email <span class="opt">(optional)</span></label>
+        <input class="input" id={`${id}-email`} name="email" type="email" autocomplete="email" maxlength="120" />
+        <p class="field-error" data-error-for="email"></p>
+      </div>
+      {
+        booking ? (
+          <div class="field">
+            <label for={`${id}-mode`}>Preference</label>
+            <select class="select" id={`${id}-mode`} name="mode">
+              <option value="In person at the centre">In person at the centre</option>
+              <option value="Online / remote">Online / remote</option>
+              <option value="No preference">No preference</option>
+            </select>
+          </div>
+        ) : (
+          <div class="field">
+            <label for={`${id}-topic`}>Topic</label>
+            <select class="select" id={`${id}-topic`} name="topic">
+              <option>General enquiry</option>
+              <option>Programs & workshops</option>
+              <option>Crystals</option>
+              <option>Corporate or group sessions</option>
+              <option>Media</option>
+            </select>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      booking && (
+        <div class="row">
+          <div class="field">
+            <label for={`${id}-date`}>Preferred date</label>
+            <input class="input" id={`${id}-date`} name="date" type="date" min={today} />
+            <p class="hint">Mon–Fri, 10:30 am – 4:30 pm. We’ll confirm the exact time.</p>
+            <p class="field-error" data-error-for="date"></p>
+          </div>
+          <div class="field">
+            <label for={`${id}-time`}>Preferred time</label>
+            <select class="select" id={`${id}-time`} name="time">
+              <option value="Any time">Any time</option>
+              <option value="Morning (10:30 am – 12:30 pm)">Morning (10:30 am – 12:30 pm)</option>
+              <option value="Afternoon (12:30 – 4:30 pm)">Afternoon (12:30 – 4:30 pm)</option>
+            </select>
+          </div>
+        </div>
+      )
+    }
+
+    <div class="field">
+      <label for={`${id}-message`}>{booking ? 'What would you like support with?' : 'Message'} <span class="opt">(optional)</span></label>
+      <textarea class="textarea" id={`${id}-message`} name="message" maxlength="1500" placeholder={booking ? 'Share as much or as little as you like.' : ''}></textarea>
+    </div>
+
+    <div class="hp-field" aria-hidden="true">
+      <label for={`${id}-website`}>Leave this field empty</label>
+      <input id={`${id}-website`} name="website" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="consent" required />
+      <span>I agree to be contacted by Transform Life Programs about my enquiry. Your details are used only to respond to your enquiry.</span>
+    </label>
+    <p class="field-error" data-error-for="consent"></p>
+
+    <div class="submit-row">
+      <button type="submit" class="btn">
+        <span data-submit-label>{booking ? 'Request appointment' : 'Send message'}</span>
+        <Icon name="arrow" />
+      </button>
+      <p class="hint" data-submit-hint>
+        {site.formEndpoint ? 'We usually reply within one working day.' : 'This opens WhatsApp with your details filled in — just press send.'}
+      </p>
+    </div>
+    <p class="form-status" role="alert" data-form-status></p>
+  </div>
+
+  <div class="form-success" data-form-success hidden tabindex="-1">
+    <span class="tick"><Icon name="check" size={26} /></span>
+    <h3 class="h3">Thank you.</h3>
+    <p class="muted" data-success-text>We’ve received your request and will be in touch shortly to confirm.</p>
+    <div class="btn-row">
+      <a class="btn btn-secondary" href="#" data-success-wa target="_blank" rel="noopener"><Icon name="whatsapp" /> Open WhatsApp again</a>
+      <a class="arrow-link" href={`tel:${site.phones.appointments.tel}`}>Or call {site.phones.appointments.display}</a>
+    </div>
+  </div>
+</form>
+
+<script>
+  import '../scripts/enquiry';
+</script>
+
+<style>
+  .enquiry {
+    position: relative;
+  }
+
+  .form-body {
+    display: grid;
+    gap: 1.3rem;
+  }
+
+  .row {
+    display: grid;
+    align-items: start;
+    gap: 1.3rem;
+  }
+
+  @media (min-width: 640px) {
+    .row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  legend {
+    margin-bottom: 0.6rem;
+  }
+
+  .type-grid {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .type {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .type input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+  }
+
+  .type-card {
+    display: grid;
+    gap: 0.15rem;
+    height: 100%;
+    padding: 1rem 1.1rem;
+    border: 1px solid #e1e2ee;
+    border-radius: 16px;
+    background: #f7f7fb;
+    transition: border-color 0.25s, background-color 0.25s, box-shadow 0.25s;
+  }
+
+  .type-card strong {
+    font-size: 0.94rem;
+    font-weight: 600;
+  }
+
+  .type-card small {
+    font-size: 0.78rem;
+    color: var(--text-3);
+  }
+
+  .type input:checked + .type-card {
+    border-color: var(--blue);
+    box-shadow: inset 0 0 0 1px var(--blue);
+    background: var(--periwinkle-50);
+  }
+
+  .type input:focus-visible + .type-card {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  [data-show-for][hidden] {
+    display: none;
+  }
+
+  .opt {
+    font-weight: 400;
+    color: var(--text-3);
+  }
+
+  .check a {
+    color: var(--text);
+  }
+
+  .submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem 1.2rem;
+  }
+
+  .submit-row .hint {
+    font-size: 0.82rem;
+    color: var(--text-3);
+    max-width: 34ch;
+  }
+
+  .form-status:empty {
+    display: none;
+  }
+
+  .form-status {
+    font-size: 0.88rem;
+    color: var(--danger);
+  }
+
+  .form-success {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    padding: var(--s4) 0;
+  }
+
+  .form-success[hidden] {
+    display: none;
+  }
+
+  .tick {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--periwinkle);
+    color: var(--ink);
+  }
+</style>

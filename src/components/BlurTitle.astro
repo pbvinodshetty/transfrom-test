@@ -1,0 +1,48 @@
+---
+// A headline whose words blur into focus when it scrolls into view.
+// Words wrapped in *asterisks* are set in the serif italic, e.g.
+// "Healing that feels like *coming home.*"
+interface Props {
+  text: string;
+  as?: 'h1' | 'h2' | 'h3';
+  class?: string;
+  id?: string;
+}
+
+const { text, as: Tag = 'h2', class: className, id } = Astro.props;
+
+let italic = false;
+const words = text
+  .split(/\s+/)
+  .filter(Boolean)
+  .map((raw) => {
+    const opens = raw.startsWith('*');
+    const closes = raw.endsWith('*');
+    if (opens) italic = true;
+    const word = { t: raw.replace(/\*/g, ''), em: italic };
+    if (closes) italic = false;
+    return word;
+  });
+const plain = words.map((w) => w.t).join(' ');
+---
+
+<Tag class:list={['blur-title split split-blur', className]} id={id} aria-label={plain}>
+  {
+    words.map((w, i) => (
+      <>
+        <span class="w" aria-hidden="true">
+          <span style={`--wi:${i}`}>{w.em ? <em>{w.t}</em> : w.t}</span>
+        </span>{' '}
+      </>
+    ))
+  }
+</Tag>
+
+<style>
+  .blur-title :global(em) {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+</style>

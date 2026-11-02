@@ -1,0 +1,1282 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { site, waLink } from '../data/site';
+import { categories, programs, programsIn, type CategoryId } from '../data/programs';
+import { founder, team } from '../data/people';
+import { img } from '../lib/images';
+
+const catIds = Object.keys(categories) as CategoryId[];
+const ask = (what: string) => waLink(site.whatsapp.appointments, `Hello, I would like to know more about ${what}.`);
+const bookLink = waLink(site.whatsapp.appointments, 'Hello, I would like to book a consultation with Dr. Deepa.');
+
+const themeIcons: Record<CategoryId, 'sparkle' | 'layers' | 'award' | 'info'> = {
+  signature: 'sparkle',
+  body: 'layers',
+  self: 'award',
+  soul: 'info',
+};
+
+const steps = [
+  { icon: 'phone', text: 'A conversation with Dr. Deepa' },
+  { icon: 'calendar', text: 'A plan chosen around you' },
+  { icon: 'check', text: 'Practices you take home' },
+] as const;
+
+// Topics the programs explore, taken from the program pages.
+const topics = ['Emotional release', 'Balance & alignment', 'Energy & vitality', 'Releasing tension', 'Mind–body connection', 'Mirror work', 'A happy relationship with money', 'Colour therapy', 'Acupressure', 'Personal crystal sessions'];
+
+// Dot field: rings of dots that spread outward as the section scrolls in.
+const dots = Array.from({ length: 28 }, (_, i) => {
+  const ring = i % 2 === 0 ? 1 : 0.62;
+  const a = (i / 28) * Math.PI * 2;
+  return { x: (Math.cos(a) * 46 * ring).toFixed(1), y: (Math.sin(a) * 40 * ring).toFixed(1), s: [4, 7, 10][i % 3], big: i % 5 === 0 };
+});
+---
+
+<Base title={site.name}>
+  <!-- ============ HERO (black) ============ -->
+  <section class="hero" id="top">
+    <svg class="sweeps" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sweep" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="#b4baea" stop-opacity="0" />
+          <stop offset="0.25" stop-color="#b4baea" stop-opacity="0.9" />
+          <stop offset="0.5" stop-color="#6a71d6" stop-opacity="0.15" />
+          <stop offset="0.75" stop-color="#b4baea" stop-opacity="0.9" />
+          <stop offset="1" stop-color="#b4baea" stop-opacity="0" />
+        </linearGradient>
+        <filter id="glow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6" /></filter>
+      </defs>
+      <g class="sweep-top">
+        <path d="M-120 330 Q 720 780 1560 330" stroke="url(#sweep)" stroke-width="14" filter="url(#glow)" opacity="0.5" />
+        <path d="M-120 330 Q 720 780 1560 330" stroke="url(#sweep)" stroke-width="1.5" />
+        <path d="M-120 290 Q 720 720 1560 290" stroke="url(#sweep)" stroke-width="1" opacity="0.35" />
+      </g>
+      <g class="sweep-bottom">
+        <path d="M-120 860 Q 720 430 1560 860" stroke="url(#sweep)" stroke-width="14" filter="url(#glow)" opacity="0.45" />
+        <path d="M-120 860 Q 720 430 1560 860" stroke="url(#sweep)" stroke-width="1.5" />
+        <path d="M-120 900 Q 720 490 1560 900" stroke="url(#sweep)" stroke-width="1" opacity="0.3" />
+      </g>
+    </svg>
+
+    <!-- Circuit traces from the emblem to small nodes, with travelling light -->
+    <svg class="circuit" viewBox="0 0 1000 220" aria-hidden="true">
+      <g class="traces">
+        <path d="M420 110 H300 L270 80 H120" />
+        <path d="M420 130 H320 L290 160 H60" />
+        <path d="M580 110 H700 L730 80 H880" />
+        <path d="M580 130 H680 L710 160 H940" />
+      </g>
+      <g class="pulses">
+        <path d="M420 110 H300 L270 80 H120" pathLength="100" />
+        <path d="M420 130 H320 L290 160 H60" pathLength="100" />
+        <path d="M580 110 H700 L730 80 H880" pathLength="100" />
+        <path d="M580 130 H680 L710 160 H940" pathLength="100" />
+      </g>
+      <g class="nodes">
+        <rect x="108" y="72" width="16" height="16" rx="4" />
+        <rect x="48" y="152" width="16" height="16" rx="4" />
+        <rect x="876" y="72" width="16" height="16" rx="4" />
+        <rect x="936" y="152" width="16" height="16" rx="4" />
+      </g>
+    </svg>
+
+    <div class="hero-inner">
+      <div class="emblem" aria-hidden="true">
+        <span class="em-grid"></span>
+        <span class="em-mark"><i></i><i></i><i></i><i></i></span>
+        <span class="em-text">TLP</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="hl"><span style="--li:0">Heal Gently,</span></span>
+        <span class="hl"><span style="--li:1">Live Fully</span></span>
+      </h1>
+      <p class="hero-lede hero-in" style="--d:1.3s">Counselling, channelled energy healing and {programs.length} transformational programs with Dr. Deepa Rani Shekar.</p>
+      <a href={bookLink} class="cta-pill hero-in" style="--d:1.45s" target="_blank" rel="noopener">
+        <span class="cta-sq"><Icon name="arrow" size={12} /></span> Book a consultation
+      </a>
+
+      <p class="mini-label hero-in" style="--d:1.7s">Four themes · {programs.length} programs</p>
+      <ul role="list" class="theme-chips">
+        {
+          catIds.map((id, i) => (
+            <li style={`--ti:${i}`}>
+              <a href={`#programs`} data-theme-jump={i}>
+                <Icon name={themeIcons[id]} size={14} />
+                <span>{categories[id].name}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ STEPS (dark) ============ -->
+  <section class="steps-sec">
+    <h2 class="title light center" data-split>Every Journey <em>Begins Gently</em></h2>
+    <ol role="list" class="steps" data-stagger>
+      {
+        steps.map((s, i) => (
+          <li>
+            <span class="step-box"><Icon name={s.icon} size={18} /></span>
+            <span class="step-text">{s.text}</span>
+            {i < steps.length - 1 && <span class="step-line" aria-hidden="true"><i></i></span>}
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- ============ WHAT WE HELP WITH (white) ============ -->
+  <section class="help" id="approach">
+    <div class="wrap center-head">
+      <span class="tag" data-animate>What we help with</span>
+      <h2 class="title" data-split>Everyday Life Carries <em>Hidden Weight</em></h2>
+      <p class="lede" data-animate>Stress, old patterns and questions without answers build up quietly. Our programs give you gentle, practical ways to set them down.</p>
+    </div>
+    <div class="wrap split-card" data-animate="scale">
+      <div class="lens">
+        <span class="lens-l"></span>
+        <span class="lens-r"></span>
+        <span class="orb o1"><Icon name="sparkle" size={14} /></span>
+        <span class="orb o2"></span>
+        <span class="orb o3"><Icon name="layers" size={13} /></span>
+        <span class="orb o4"></span>
+        <p class="lens-text">Gentle <span>Release</span></p>
+      </div>
+      <div class="panel">
+        <h3>What our programs explore</h3>
+        <ul role="list" class="topic-list">
+          {topics.map((t) => <li><Icon name="chevron" size={12} class="chev" /> {t}</li>)}
+        </ul>
+        <a href="#programs" class="dark-pill">View programs <Icon name="arrow-down" size={12} /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROGRAMS (dot field, then a dark band) ============ -->
+  <section class="programs" id="programs" data-progress>
+    <div class="dot-field" aria-hidden="true">
+      {dots.map((d) => <i class:list={{ big: d.big }} style={`--x:${d.x}vw;--y:${d.y}vh;--s:${d.s}px`}></i>)}
+    </div>
+    <div class="wrap center-head prog-head">
+      <span class="tag" data-animate>Programs</span>
+      <h2 class="title" data-split>Four Themes for <em>Every Stage</em></h2>
+    </div>
+
+    <div class="band" data-themes>
+      <div class="band-inner">
+        <div class="band-left">
+          {
+            catIds.map((id, i) => (
+              <div class:list={['band-word', { show: i === 0 }]} data-theme-word={i}>
+                <p class="bw-title">
+                  {categories[id].name}
+                  <span class="bw-dot" aria-hidden="true"></span>
+                </p>
+                <ul role="list" class="bw-progs">
+                  {programsIn(id).map((p) => (
+                    <li>
+                      <a href={ask(p.name)} target="_blank" rel="noopener">
+                        {p.name} <Icon name="arrow-up-right" size={10} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+
+        <ul role="list" class="band-list">
+          {
+            catIds.map((id, i) => (
+              <li>
+                <button class:list={['bl-item', { active: i === 0 }]} data-theme-item={i} aria-pressed={i === 0 ? 'true' : 'false'}>
+                  <span class="bl-dot" aria-hidden="true"></span>
+                  <span class="bl-text">
+                    <strong>{categories[id].name}</strong>
+                    <small>{programsIn(id).length} programs · {categories[id].blurb}</small>
+                  </span>
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT (white) ============ -->
+  <section class="about" id="about">
+    <div class="wrap center-head">
+      <span class="tag" data-animate>About</span>
+      <h2 class="title" data-split>Guided by <em>Dr. Deepa Rani Shekar</em></h2>
+    </div>
+    <div class="wrap split-card about-card" data-animate="scale">
+      <div class="portrait">
+        <Image src={img('founder/portrait-silk')} alt={founder.name} widths={[480, 760]} sizes="(min-width: 900px) 40vw, 92vw" />
+        <span class="portrait-glow" aria-hidden="true"></span>
+        <p class="portrait-tag">Founder, counsellor & energy healer</p>
+      </div>
+      <div class="panel">
+        <h3>Her story</h3>
+        <p class="panel-text">{founder.name} taught English for almost two decades before healing became her life’s work. After Reiki helped her recover from five surgeries, she trained as a Reiki Master and Heal Your Life® workshop leader, and founded Transform Life Programs® with her daughter, Rekha Datta.</p>
+        <ul role="list" class="topic-list one-col">
+          {founder.qualifications.slice(1, 4).map((q) => <li><Icon name="chevron" size={12} class="chev" /> {q}</li>)}
+        </ul>
+        <div class="team-row">
+          <ul role="list" class="avatars">
+            {team.map((t) => <li><Image src={img(`team/${t.image}`)} alt={t.name} title={`${t.name}, ${t.role}`} widths={[96]} sizes="34px" /></li>)}
+          </ul>
+          <p>With {team.map((t) => t.name.split(' ')[0]).join(', ').replace(/, ([^,]*)$/, ' and $1')}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Program band: pick a theme from the list; it also advances on its own
+  // every few seconds until someone chooses.
+  const band = document.querySelector<HTMLElement>('[data-themes]');
+  if (band) {
+    const items = Array.from(band.querySelectorAll<HTMLButtonElement>('[data-theme-item]'));
+    const words = Array.from(band.querySelectorAll<HTMLElement>('[data-theme-word]'));
+    let at = 0;
+    let timer = 0;
+    const show = (i: number) => {
+      at = i;
+      items.forEach((b, j) => {
+        b.classList.toggle('active', j === i);
+        b.setAttribute('aria-pressed', String(j === i));
+      });
+      words.forEach((w, j) => w.classList.toggle('show', j === i));
+    };
+    const stop = () => window.clearInterval(timer);
+    items.forEach((b, i) =>
+      b.addEventListener('click', () => {
+        stop();
+        show(i);
+      }),
+    );
+    document.querySelectorAll<HTMLElement>('[data-theme-jump]').forEach((a) =>
+      a.addEventListener('click', () => {
+        stop();
+        show(Number(a.dataset.themeJump));
+      }),
+    );
+    if (!reduced && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => {
+        stop();
+        if (e.isIntersecting) timer = window.setInterval(() => show((at + 1) % items.length), 4500);
+      }).observe(band);
+      band.addEventListener('pointerenter', stop);
+    }
+  }
+</script>
+
+<style>
+  /* ---------- Shared ---------- */
+  :global(body) {
+    background: var(--white);
+  }
+
+  .wrap {
+    width: min(100% - 2 * var(--gutter), 1100px);
+    margin-inline: auto;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .center-head {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .title {
+    max-width: 18ch;
+    font-family: var(--font);
+    font-size: clamp(1.9rem, 1.3rem + 2.2vw, 3rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    color: #121a3a;
+  }
+
+  .title :global(em) {
+    font-style: normal;
+    color: var(--periwinkle-600);
+  }
+
+  .title.light {
+    margin-inline: auto;
+    color: var(--white);
+  }
+
+  .title.light :global(em) {
+    color: var(--periwinkle);
+  }
+
+  .tag {
+    padding: 0.2rem 0.65rem;
+    border: 1px solid rgba(18, 26, 58, 0.2);
+    border-radius: 999px;
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: #121a3a;
+  }
+
+  .lede {
+    max-width: 52ch;
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--ink-3);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-height: max(720px, 100svh);
+    padding: calc(var(--header-h) + 1rem) var(--gutter) 3rem;
+    overflow: hidden;
+    background: radial-gradient(60% 40% at 50% 50%, #0d1024 0%, #04050a 70%);
+    color: var(--white);
+  }
+
+  .sweeps {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sweeps path {
+    fill: none;
+    stroke-dasharray: 2000;
+  }
+
+  .circuit {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--header-h) + 0.5rem);
+    z-index: -1;
+    width: min(1000px, 100%);
+    translate: -50% 0;
+  }
+
+  .traces path {
+    fill: none;
+    stroke: rgba(180, 186, 234, 0.16);
+    stroke-width: 1;
+  }
+
+  .pulses path {
+    fill: none;
+    stroke: var(--periwinkle);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-dasharray: 6 94;
+    stroke-dashoffset: 100;
+    filter: drop-shadow(0 0 4px var(--periwinkle));
+    opacity: 0;
+  }
+
+  .nodes rect {
+    fill: #0f1226;
+    stroke: rgba(180, 186, 234, 0.35);
+  }
+
+  @media (max-width: 759px) {
+    .circuit {
+      display: none;
+    }
+  }
+
+  .hero-inner {
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+    text-align: center;
+  }
+
+  /* Glowing glass emblem with the petal mark */
+  .emblem {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 110px;
+    height: 110px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(180, 186, 234, 0.45);
+    border-radius: 18px;
+    background: radial-gradient(circle at 50% 40%, rgba(106, 113, 214, 0.55), rgba(15, 18, 38, 0.95) 70%);
+    box-shadow:
+      0 0 40px rgba(106, 113, 214, 0.45),
+      inset 0 0 24px rgba(180, 186, 234, 0.25);
+  }
+
+  .em-grid {
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(180, 186, 234, 0.1) 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(90deg, rgba(180, 186, 234, 0.1) 0 1px, transparent 1px 10px);
+  }
+
+  .em-mark {
+    position: relative;
+    width: 34px;
+    height: 34px;
+  }
+
+  .em-mark i {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50% 50% 50% 0;
+    background: linear-gradient(135deg, #e8eaff, var(--periwinkle));
+    box-shadow: 0 0 12px rgba(180, 186, 234, 0.8);
+  }
+
+  .em-mark i:nth-child(1) {
+    top: 0;
+    left: 9.5px;
+    rotate: 135deg;
+  }
+
+  .em-mark i:nth-child(2) {
+    top: 9.5px;
+    right: 0;
+    rotate: 225deg;
+  }
+
+  .em-mark i:nth-child(3) {
+    bottom: 0;
+    left: 9.5px;
+    rotate: 315deg;
+  }
+
+  .em-mark i:nth-child(4) {
+    top: 9.5px;
+    left: 0;
+    rotate: 45deg;
+  }
+
+  .em-text {
+    position: relative;
+    margin-top: -0.4rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: rgba(232, 234, 255, 0.85);
+  }
+
+  .hero-title {
+    display: grid;
+    font-family: var(--font);
+    font-size: clamp(2.6rem, 1.4rem + 5vw, 5.4rem);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    background: linear-gradient(180deg, #ffffff 30%, #a9adc8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  @media (min-width: 760px) {
+    .hero-title {
+      display: flex;
+      gap: 0.25em;
+    }
+  }
+
+  .hl {
+    display: inline-block;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+  }
+
+  .hl > span {
+    display: inline-block;
+    background: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .hero-lede {
+    max-width: 34ch;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.3rem 1rem 0.3rem 0.3rem;
+    border-radius: 9px;
+    background: var(--white);
+    color: #06070e;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 0 30px rgba(180, 186, 234, 0.25);
+    transition: box-shadow 0.4s, translate 0.35s var(--ease);
+  }
+
+  .cta-pill:hover {
+    translate: 0 -2px;
+    box-shadow: 0 0 40px rgba(180, 186, 234, 0.5);
+  }
+
+  .cta-sq {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--periwinkle-500), var(--periwinkle-700));
+    color: var(--white);
+  }
+
+  .mini-label {
+    margin-top: 2.5rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .theme-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 640px) {
+    .theme-chips {
+      grid-template-columns: repeat(4, 116px);
+    }
+  }
+
+  .theme-chips a {
+    display: grid;
+    justify-items: center;
+    gap: 0.45rem;
+    height: 100%;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    font-size: 0.6875rem;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: border-color 0.3s, background-color 0.3s, translate 0.35s var(--ease);
+  }
+
+  .theme-chips a:hover {
+    border-color: rgba(180, 186, 234, 0.6);
+    translate: 0 -3px;
+  }
+
+  .theme-chips :global(svg) {
+    color: var(--periwinkle);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* The light sweeps draw in from the edges, then shimmer */
+    .sweeps path {
+      animation: sweep-draw 2.2s var(--ease-out) 0.2s backwards;
+    }
+
+    .sweep-top,
+    .sweep-bottom {
+      animation: shimmer 6s ease-in-out 2.4s infinite alternate;
+    }
+
+    .sweep-bottom {
+      animation-delay: 3.4s;
+    }
+
+    .emblem {
+      animation:
+        emblem-in 1.4s var(--ease-out) 0.4s backwards,
+        emblem-glow 4s ease-in-out 2s infinite alternate;
+    }
+
+    .hl > span {
+      animation: title-in 1.3s var(--ease-out) backwards;
+      animation-delay: calc(0.8s + var(--li) * 0.15s);
+    }
+
+    .hero-in {
+      animation: fade-up 1s var(--ease-out) backwards;
+      animation-delay: var(--d, 0s);
+    }
+
+    .theme-chips li {
+      animation: fade-up 0.9s var(--ease-out) backwards;
+      animation-delay: calc(1.85s + var(--ti) * 0.1s);
+    }
+
+    .pulses path {
+      animation: pulse 3.2s linear 2.2s infinite;
+    }
+
+    .pulses path:nth-child(2) {
+      animation-delay: 2.9s;
+    }
+
+    .pulses path:nth-child(3) {
+      animation-delay: 2.5s;
+    }
+
+    .pulses path:nth-child(4) {
+      animation-delay: 3.3s;
+    }
+  }
+
+  @keyframes sweep-draw {
+    from {
+      stroke-dashoffset: 2000;
+    }
+  }
+
+  @keyframes shimmer {
+    to {
+      opacity: 0.55;
+    }
+  }
+
+  @keyframes emblem-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.8);
+      filter: blur(8px);
+    }
+  }
+
+  @keyframes emblem-glow {
+    to {
+      box-shadow:
+        0 0 70px rgba(106, 113, 214, 0.7),
+        inset 0 0 30px rgba(180, 186, 234, 0.35);
+    }
+  }
+
+  @keyframes title-in {
+    from {
+      transform: translateY(100%);
+      filter: blur(10px);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+      stroke-dashoffset: 100;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* ---------- Steps ---------- */
+  .steps-sec {
+    padding: clamp(3rem, 6vw, 5rem) var(--gutter) clamp(5rem, 10vw, 7rem);
+    background: #04050a;
+  }
+
+  .steps {
+    display: grid;
+    gap: 2rem;
+    max-width: 760px;
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+    padding: 0;
+  }
+
+  @media (min-width: 700px) {
+    .steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .steps li {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .step-box {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border: 1px solid rgba(180, 186, 234, 0.35);
+    border-radius: 12px;
+    background: radial-gradient(circle, rgba(106, 113, 214, 0.35), rgba(15, 18, 38, 0.9));
+    box-shadow: 0 0 24px rgba(106, 113, 214, 0.3);
+    color: var(--periwinkle);
+  }
+
+  .step-text {
+    max-width: 16ch;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  /* Connector with a light travelling along it */
+  .step-line {
+    position: absolute;
+    top: 27px;
+    left: calc(50% + 40px);
+    width: calc(100% - 80px + 2rem);
+    height: 1px;
+    overflow: hidden;
+    background: rgba(180, 186, 234, 0.2);
+  }
+
+  .step-line i {
+    position: absolute;
+    top: -2px;
+    left: -10%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--periwinkle);
+    box-shadow: 0 0 8px var(--periwinkle);
+  }
+
+  @media (max-width: 699px) {
+    .step-line {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .step-line i {
+      animation: travel 2.6s ease-in-out infinite;
+    }
+  }
+
+  @keyframes travel {
+    to {
+      left: 105%;
+    }
+  }
+
+  /* ---------- Help (white) ---------- */
+  .help {
+    position: relative;
+    padding: clamp(5rem, 10vw, 7rem) 0 clamp(3rem, 6vw, 5rem);
+    background: var(--white);
+  }
+
+  .split-card {
+    display: grid;
+    gap: 10px;
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  @media (min-width: 860px) {
+    .split-card {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+
+  /* Dark lens graphic: two big glowing circles leaving a narrow waist */
+  .lens {
+    position: relative;
+    min-height: 340px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #050714;
+  }
+
+  .lens-l,
+  .lens-r {
+    position: absolute;
+    top: 50%;
+    width: 120%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 54%, rgba(106, 113, 214, 0.2) 62%, rgba(140, 147, 227, 0.75) 69.5%, rgba(5, 7, 20, 0) 71%);
+    translate: 0 -50%;
+  }
+
+  .lens-l {
+    right: 56%;
+  }
+
+  .lens-r {
+    left: 56%;
+  }
+
+  .orb {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #121a3a;
+  }
+
+  .o1 {
+    left: 42%;
+    top: 16%;
+    width: 34px;
+    height: 34px;
+    background: #eef0fb;
+  }
+
+  .o2 {
+    left: 52%;
+    top: 28%;
+    width: 26px;
+    height: 26px;
+    background: var(--periwinkle);
+  }
+
+  .o3 {
+    left: 47%;
+    top: 62%;
+    width: 30px;
+    height: 30px;
+    background: var(--periwinkle-200);
+  }
+
+  .o4 {
+    left: 44%;
+    top: 80%;
+    width: 22px;
+    height: 22px;
+    background: rgba(140, 147, 227, 0.5);
+  }
+
+  .lens-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 1.1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--white);
+    translate: -50% -50%;
+  }
+
+  .lens-text span {
+    color: var(--periwinkle);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .o1 {
+      animation: bob 6s ease-in-out infinite;
+    }
+
+    .o2 {
+      animation: bob 7s ease-in-out -2s infinite;
+    }
+
+    .o3 {
+      animation: bob 5.5s ease-in-out -1s infinite;
+    }
+
+    .o4 {
+      animation: bob 8s ease-in-out -3s infinite;
+    }
+  }
+
+  @keyframes bob {
+    50% {
+      transform: translate(10px, -14px);
+    }
+  }
+
+  .panel {
+    display: grid;
+    align-content: start;
+    gap: 1.1rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border-radius: 18px;
+    background: #eef0fb;
+  }
+
+  .panel h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #121a3a;
+  }
+
+  .topic-list {
+    display: grid;
+    gap: 0.55rem 1.5rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 560px) {
+    .topic-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .topic-list.one-col {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: #2a3157;
+  }
+
+  .topic-list :global(.chev) {
+    flex: none;
+    margin-top: 0.15rem;
+    rotate: -90deg;
+    color: var(--periwinkle-700);
+  }
+
+  .dark-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    justify-self: start;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    background: #121a3a;
+    color: var(--white);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+
+  .dark-pill:hover {
+    background: var(--periwinkle-700);
+  }
+
+  /* ---------- Programs ---------- */
+  .programs {
+    position: relative;
+    isolation: isolate;
+    padding-top: clamp(5rem, 10vw, 8rem);
+    overflow: hidden;
+    background: var(--white);
+  }
+
+  /* Dots spread outward from the heading as the section scrolls in */
+  .dot-field {
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    top: clamp(9rem, 16vw, 12rem);
+    width: 0;
+    height: 0;
+  }
+
+  .dot-field i {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: var(--periwinkle);
+    opacity: calc(0.25 + var(--p, 1) * 0.6);
+    transform: translate(-50%, -50%) translate(calc(var(--x) * (0.35 + var(--p, 1) * 0.65)), calc(var(--y) * (0.35 + var(--p, 1) * 0.65)));
+    transition: transform 0.3s linear;
+  }
+
+  .dot-field i.big {
+    background: #7f86b8;
+  }
+
+  .prog-head {
+    position: relative;
+    margin-bottom: clamp(5rem, 12vw, 9rem);
+  }
+
+  /* Dark band with the stepper list */
+  .band {
+    position: relative;
+    background: #121a3a;
+    color: var(--white);
+  }
+
+  .band-inner {
+    display: grid;
+    gap: 2.5rem;
+    width: min(100% - 2 * var(--gutter), 1100px);
+    margin-inline: auto;
+    padding: clamp(3rem, 6vw, 4.5rem) 0;
+  }
+
+  @media (min-width: 860px) {
+    .band-inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+    }
+  }
+
+  .band-left {
+    display: grid;
+  }
+
+  .band-word {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 1.25rem;
+    align-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(14px);
+    transition: opacity 0.6s, transform 0.6s var(--ease-out), visibility 0.6s;
+  }
+
+  .band-word:global(.show) {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .bw-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: clamp(1.7rem, 1.2rem + 2vw, 2.6rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--periwinkle);
+  }
+
+  .bw-dot {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--periwinkle);
+    box-shadow: 0 0 0 6px rgba(180, 186, 234, 0.15), 0 0 20px rgba(180, 186, 234, 0.7);
+  }
+
+  .bw-progs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bw-progs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: border-color 0.3s, background-color 0.3s;
+  }
+
+  .bw-progs a:hover {
+    border-color: var(--periwinkle);
+    background: rgba(180, 186, 234, 0.1);
+  }
+
+  .band-list {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .bl-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.85rem 0.75rem 0.85rem 1rem;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .bl-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 22%;
+    bottom: 22%;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--periwinkle);
+    transform: scaleY(0);
+    transition: transform 0.4s var(--ease);
+  }
+
+  .bl-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .bl-item:global(.active)::before {
+    transform: scaleY(1);
+  }
+
+  .bl-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(180, 186, 234, 0.35);
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+
+  .bl-item:global(.active) .bl-dot {
+    background: var(--periwinkle);
+    box-shadow: 0 0 10px var(--periwinkle);
+  }
+
+  .bl-text {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .bl-text strong {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s;
+  }
+
+  .bl-item:global(.active) strong {
+    color: var(--periwinkle);
+  }
+
+  .bl-text small {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* ---------- About ---------- */
+  .about {
+    padding: clamp(5rem, 10vw, 7rem) 0;
+  }
+
+  .portrait {
+    position: relative;
+    isolation: isolate;
+    min-height: 380px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #050714;
+  }
+
+  .portrait img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 15%;
+  }
+
+  .portrait-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgba(5, 7, 20, 0.75) 100%);
+  }
+
+  .portrait-tag {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(5, 7, 20, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 0.6875rem;
+    color: var(--white);
+  }
+
+  .panel-text {
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: #2a3157;
+  }
+
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(18, 26, 58, 0.1);
+    font-size: 0.75rem;
+    color: #2a3157;
+  }
+
+  .avatars {
+    display: flex;
+    flex: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .avatars li + li {
+    margin-left: -9px;
+  }
+
+  .avatars img {
+    width: 34px;
+    height: 34px;
+    border: 2px solid #eef0fb;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+</style>

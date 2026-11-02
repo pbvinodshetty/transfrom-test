@@ -1,0 +1,319 @@
+---
+import Icon from './Icon.astro';
+import { site, nav, waLink } from '../data/site';
+import credits from '../assets/stock/CREDITS.json';
+
+const year = new Date().getFullYear();
+const directions = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapQuery)}`;
+---
+
+<footer class="site-footer" id="contact">
+  <div class="aura" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="cta">
+      <h2 class="cta-title" data-split="blur">Begin your healing journey</h2>
+      <div class="cta-side" data-animate style="--d:300ms">
+        <p>One conversation with Dr. Deepa is the best place to start.</p>
+        <div class="btn-row">
+          <a href={`tel:${site.phones.appointments.tel}`} class="btn btn-on-dark"><Icon name="phone" /> Call to book</a>
+          <a href={waLink(site.whatsapp.appointments, 'Hello, I would like to know more about Transform Life Programs.')} class="btn btn-ghost-light" target="_blank" rel="noopener">
+            <Icon name="whatsapp" /> WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols" data-stagger>
+      <div>
+        <p class="f-title">Explore</p>
+        <ul role="list" class="f-links">
+          {nav.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </div>
+      <div>
+        <p class="f-title">Contact</p>
+        <ul role="list" class="f-contact">
+          <li><a href={`tel:${site.phones.appointments.tel}`}><Icon name="phone" size={16} />{site.phones.appointments.display}</a><span>Appointments</span></li>
+          <li><a href={`tel:${site.phones.crystals.tel}`}><Icon name="phone" size={16} />{site.phones.crystals.display}</a><span>Crystals & classes</span></li>
+          <li><a href={`mailto:${site.email}`}><Icon name="mail" size={16} />{site.email}</a></li>
+          <li><a href={waLink(site.whatsapp.crystals, 'Hello, could you share the crystals you have available?')} target="_blank" rel="noopener"><Icon name="whatsapp" size={16} />Order crystals</a><span>Bracelets, malas & sacred objects</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="f-title">Visit</p>
+        <address>
+          {site.address.lines.map((l) => <span>{l}</span>)}
+        </address>
+        <a href={directions} target="_blank" rel="noopener" class="f-dir">Get directions <Icon name="arrow-up-right" size={14} /></a>
+      </div>
+      <div>
+        <p class="f-title">Hours</p>
+        <ul role="list" class="f-hours">
+          {site.hours.map((h) => <li><span>{h.days}</span>{h.time}</li>)}
+        </ul>
+        <p class="f-note">{site.appointmentNote}</p>
+      </div>
+    </div>
+
+    <p class="wordmark" aria-hidden="true" data-animate>Transform Life</p>
+
+    <div class="base">
+      <p>© {year} {site.legalName} · {site.descriptor}, Bengaluru</p>
+      <p>Our programs are complementary wellbeing practices, not a substitute for medical care.</p>
+      <details class="credits">
+        <summary>Photo credits</summary>
+        <ul role="list">
+          {
+            credits.map((c) => (
+              <li>
+                <a href={c.source} target="_blank" rel="noopener">{c.title}</a> — {c.author}, {c.license}
+              </li>
+            ))
+          }
+          <li>All other photos © Transform Life Programs.</li>
+        </ul>
+      </details>
+      <a href="#top" class="to-top" aria-label="Back to top"><Icon name="arrow-up-right" size={18} class="up" /></a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-top: var(--section);
+    background: var(--night);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9375rem;
+  }
+
+  .aura {
+    position: absolute;
+    inset: -30% -10% auto;
+    z-index: -1;
+    height: 80%;
+    background:
+      radial-gradient(40% 50% at 20% 40%, rgba(140, 147, 227, 0.35), transparent 70%),
+      radial-gradient(35% 45% at 80% 30%, rgba(232, 173, 196, 0.18), transparent 70%);
+    filter: blur(20px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .aura {
+      animation: aura 18s ease-in-out infinite alternate;
+    }
+  }
+
+  @keyframes aura {
+    to {
+      transform: translate(4%, 6%) scale(1.08);
+    }
+  }
+
+  /* Closing call to action */
+  .cta {
+    display: grid;
+    gap: var(--s4);
+    padding-bottom: var(--s6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  @media (min-width: 960px) {
+    .cta {
+      grid-template-columns: 1.3fr 0.7fr;
+      align-items: end;
+      gap: var(--s6);
+    }
+  }
+
+  .cta-title {
+    max-width: 13ch;
+    font-size: clamp(2.6rem, 1.6rem + 4.2vw, 5.25rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--white);
+  }
+
+  .cta-side {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .cta-side p {
+    font-size: var(--fs-md);
+    max-width: 34ch;
+  }
+
+  /* Columns */
+  .cols {
+    display: grid;
+    gap: var(--s4);
+    padding-block: var(--s5);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 960px) {
+    .cols {
+      grid-template-columns: 0.8fr 1.2fr 1.2fr 1fr;
+    }
+  }
+
+  .f-title {
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--periwinkle-200);
+  }
+
+  .f-links,
+  .f-contact,
+  .f-hours {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-footer a:not(.btn) {
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .f-links a {
+    color: rgba(255, 255, 255, 0.75) !important;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: color 0.2s, background-size 0.4s var(--ease);
+  }
+
+  .f-links a:hover {
+    color: var(--white) !important;
+    background-size: 100% 1px;
+  }
+
+  .f-contact li {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .f-contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .f-contact a :global(svg) {
+    flex: none;
+    color: var(--periwinkle-200);
+  }
+
+  .f-contact span {
+    padding-left: 1.6rem;
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  address {
+    display: grid;
+    font-style: normal;
+    line-height: 1.6;
+  }
+
+  .f-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    font-weight: 600;
+    color: var(--periwinkle-200) !important;
+  }
+
+  .f-hours li {
+    display: grid;
+  }
+
+  .f-hours span {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .f-note {
+    margin-top: 0.9rem;
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Oversized wordmark */
+  .wordmark {
+    margin: var(--s2) 0 -0.12em;
+    font-size: clamp(3rem, 12.5vw, 11.5rem);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+    white-space: nowrap;
+    background: linear-gradient(180deg, rgba(207, 211, 244, 0.55), rgba(207, 211, 244, 0.05) 85%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    user-select: none;
+    text-align: center;
+  }
+
+  /* Base */
+  .base {
+    position: relative;
+    display: grid;
+    gap: 0.5rem;
+    padding-block: var(--s3);
+    padding-right: 3.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .credits summary {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .credits ul {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+  }
+
+  .credits a {
+    color: rgba(255, 255, 255, 0.75) !important;
+    text-decoration: underline !important;
+  }
+
+  .to-top {
+    position: absolute;
+    right: 0;
+    top: var(--s3);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: background-color 0.25s, transform 0.3s var(--ease);
+  }
+
+  .to-top:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-3px);
+  }
+
+  :global(.up) {
+    transform: rotate(-45deg);
+  }
+</style>
